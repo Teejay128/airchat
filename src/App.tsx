@@ -2,15 +2,15 @@ import { FC, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom"
 import Cookies from "universal-cookie";
 
-// Pages
+import Header from "./components/Header"
+import PrivateRoute from "./components/PrivateRoute"
+
 import HomePage from "./pages/HomePage";
 import ChatPage from "./pages/ChatPage";
 import RoomPage from "./pages/RoomPage";
 import AuthPage from "./pages/AuthPage";
 import NotFoundPage from "./pages/NotFoundPage"
 
-// Components
-import Header from "./components/Header";
 
 const cookie = new Cookies();
 
@@ -20,21 +20,22 @@ const App: FC = () => {
   // console.log(user, room)
 
   return (
-    <div className="flex flex-col min-h-screen bg-blue-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-800 to-indigo-300">
       <Header room={room} user={user} />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<HomePage user={user} room={room} />} />
-          <Route path="/auth" element={<AuthPage user={user} setUser={setUser} />} />
-          <Route path="/room" element={<RoomPage room={room} setRoom={setRoom} />} />
+      <Routes>
+        <Route path="/" element={<HomePage user={user} room={room} />} />
+        <Route path="/auth" element={<AuthPage user={user} setUser={setUser} />} />
+        <Route path="/room" element={<RoomPage room={room} setRoom={setRoom} />} />
+        <Route path="/room/:roomId" element={<RoomPage room={room} setRoom={setRoom} />} />
+
+        {/* Protected Routes */}
+        <Route element={<PrivateRoute user={user} />} >
           <Route path="/chat" element={user ? (<ChatPage room={room} user={user} />) : (<Navigate to="/auth" replace />)} />
-          <Route path="/room/:roomId" element={<RoomPage room={room} setRoom={setRoom} />} />
-          {/* How to check for authentication? Or do I just sign them in straightaway... */}
           <Route path="/chat/:chatId" element={user ? (<ChatPage room={room} user={user} />) : (<Navigate to="/auth" replace />)} />
-          {/* <Route path="/board/:boardId" element={<ChatPage room={room} user={user} />} /> */}
-          <Route path="/*" element={<NotFoundPage />} />
-        </Routes>
-      </main>
+        </Route>
+
+        <Route path="/*" element={<NotFoundPage />} />
+      </Routes>
     </div>
   );
 };

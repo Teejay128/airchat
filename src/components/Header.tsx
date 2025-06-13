@@ -19,30 +19,31 @@ const Header: FC<headerProps> = ({
         <FaUsers size={32} className="text-white" />
         <div className="flex flex-col leading-tight">
           <p className="text-sm font-semibold text-white truncate max-w-[160px] sm:max-w-[200px]">
-            {room || "Airchat (Default Room)"}
+            room: {room}
           </p>
           <p className="text-xs text-indigo-200 truncate max-w-[160px] sm:max-w-[200px]">
-            u: {user || "Aribad (App Creator)"}
+            user: {user}
           </p>
         </div>
       </Link>
       <div className="flex gap-2 sm:gap-3">
-        {room && (
+        {(user && room) ? (
           <Link to={"/chat/" + room} className="action-button" type="button" title="Go to chat">
             <FaComment className="text-white" />
           </Link>
+        ) : (
+          <div className="action-button" title="Sign in to Chat">
+            <FaComment className="text-white opacity-50" />
+          </div>
         )}
-        {user && (
-          <Link to="/room/" className="action-button" type="button" title="Change room">
-            <FaDoorOpen className="text-white" />
-          </Link>
-        )}
+        <Link to="/room/" title="Switch Room" className="action-button">
+          <FaDoorOpen className="text-white" />
+        </Link>
         <Link to="/auth" className="action-button" type="button" title="User settings">
           <FaUser className="text-white" />
         </Link>
       </div>
     </div>
-
   )
 };
 

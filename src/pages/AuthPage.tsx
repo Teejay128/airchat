@@ -1,11 +1,15 @@
-import { FC } from "react";
+import { FC, useRef } from "react";
 import { auth } from "../../firebase-config";
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
-import { signInAnonymously, signOut } from "firebase/auth"; 
-import { uniqueNamesGenerator, adjectives, animals } from "unique-names-generator";
+import { signInAnonymously, signOut } from "firebase/auth";
+import {
+  uniqueNamesGenerator,
+  adjectives,
+  animals,
+} from "unique-names-generator";
 
-import Button from "../components/Button";
+import Input from "../components/Input";
 
 const cookie = new Cookies();
 
@@ -15,8 +19,12 @@ type authProps = {
 };
 
 const AuthPage: FC<authProps> = ({ user, setUser }) => {
-  const navigate = useNavigate()
-  
+  const authRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/room";
+
   const anonymousSignIn = async () => {
     try {
       await signInAnonymously(auth);
@@ -25,9 +33,10 @@ const AuthPage: FC<authProps> = ({ user, setUser }) => {
         separator: " ",
         style: "capital",
       });
-      navigate("/room")
+      console.log(randomName);
       setUser(randomName);
       cookie.set("user", randomName);
+      navigate(from, { replace: true });
     } catch (error) {
       console.error(error);
     }
@@ -38,51 +47,64 @@ const AuthPage: FC<authProps> = ({ user, setUser }) => {
       await signOut(auth);
       cookie.remove("user");
       setUser("");
+      console.log(user);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-800 to-indigo-300">
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-md shadow-md p-6">
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
-            Welcome, <span className="text-indigo-600">{user || "Dear User"}</span>
+    <>
+      <main className="flex-1 container mx-auto mt-4 p-6 bg-indigo-100/60 text-gray-800 rounded-lg shadow-md backdrop-blur-sm">
+        <section className="text-center mb-6">
+          <h1 className="text-4xl font-bold text-gray-800">
+            Welcome,{" "}
+            <span className="text-indigo-700">{user || "Dear User"}</span>
+          </h1>
+          <p className="mt-1 text-base sm:text-lg text-gray-600">
+            Sign in anonymously to join a room and start chatting right away.
+          </p>
+        </section>
+
+        <section className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2 text-center">
+            After signing in, you can:
           </h2>
+          <ul className="list-disc list-inside space-y-2 text-gray-700 max-w-md mx-auto">
+            <li>Join rooms and meet others.</li>
+            <li>Chat in real time with zero friction.</li>
+            <li>Engage in topic-driven discussions.</li>
+            <li>Explore more features as they roll out.</li>
+          </ul>
+          <p className="text-xs text-gray-600 mt-5 text-center">
+            <span className="font-semibold">Info:</span> Anonymous sign-in gives
+            you a random username so you can dive right in.
+          </p>
+        </section>
 
-          <section className="mt-4">
-            <h3 className="text-lg font-semibold text-center text-gray-800 mb-3">
-              After signing in, you can:
-            </h3>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 text-sm">
-              <li>Join rooms and meet others.</li>
-              <li>Chat in real time with zero friction.</li>
-              <li>Engage in topic-driven discussions.</li>
-              <li>Explore more features as they roll out.</li>
-            </ul>
+        {/* Extra section for admin management */}
+      </main>
 
-            <p className="text-xs text-gray-600 mt-5 text-center">
-              <span className="font-semibold">Info:</span> Anonymous sign-in gives you a random username so you can dive right in.
-            </p>
-          </section>
-        </div>
-      </div>
-
-      {/* Sticky button footer */}
       <footer className="p-1 bg-indigo-300 shadow-md sticky bottom-0 z-50">
         {user ? (
-          <Button text={`username: ${user}`} func={logOut} btnText="Sign Out" />
+          <Input
+            placeholder={`username: ${user}`}
+            ref={authRef}
+            func={logOut}
+            btnText="Sign Out"
+            disabled={true}
+          />
         ) : (
-          <Button
-            text="Click below to sign in anonymously and start chatting!"
+          <Input
+            placeholder="Create an anonymous account"
+            ref={authRef}
             func={anonymousSignIn}
             btnText="Sign In"
+            disabled={true}
           />
         )}
       </footer>
-    </div>
+    </>
   );
 };
 

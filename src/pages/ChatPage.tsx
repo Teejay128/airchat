@@ -9,7 +9,6 @@ import {
 
 import { Message, messageProp } from "../components/Message";
 import Input from "../components/Input"
-import Button from "../components/Button"
 // import { defaultMessages } from "../assets/messages";
 
 type chatProps = {
@@ -24,6 +23,7 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputTextRef = useRef<HTMLInputElement>(null)
 
+  // CONSOLER RIGHT HERE
   if(chatId) console.log(chatId)
   if(!room) room = "Airchat"
   const messagesRef = collection(db, room);
@@ -101,19 +101,22 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
         <div ref={scrollRef} />
       </div>
 
-      <div className="p-1 bg-indigo-300 shadow-md sticky bottom-0 z-50">
+      <div className="p-1 bg-indigo-300 sticky bottom-0 z-50">
         {user ? (
           <Input
             placeholder="Type your message..."
             ref={inputTextRef}
             func={sendMessage}
             btnText="Send"
+            disabled={false}
           />
         ) : (
-          <Button
-            text="Sign in to send messages to this room"
+          <Input
+            placeholder="Sign in to send messages to this room"
+            ref={inputTextRef}
             func={signInPage}
             btnText="Go to SignIn"
+            disabled={true}
           />
         )}
       </div>

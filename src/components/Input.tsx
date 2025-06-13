@@ -4,25 +4,27 @@ type inputProps = {
     placeholder: string;
     ref: RefObject<HTMLInputElement | null>;
     func: () => void;
-    btnText: string
+    btnText: string;
+    disabled: boolean;
 };
 
 const Input: FC<inputProps> = ({
     placeholder,
     ref,
     func,
-    btnText
+    btnText,
+    disabled
 }) => {
 
     return (
-        <div className="p-1 bg-indigo-300 shadow-md sticky bottom-0 z-50">
-        <div className="flex items-center gap-0.5">
+        <div className="p-1 bg-indigo-300 shadow-md sticky bottom-0 z-50 flex items-center gap-0.5">
             <input
             type="text"
             placeholder={placeholder}
             ref={ref}
-            className="flex-1 px-2 py-1.5 text-sm border border-gray-400 rounded-l-md bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+            className="flex-1 px-2 py-1.5 text-sm border border-gray-400 rounded-l-md bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-600 disabled:opacity-50"
             required
+            disabled={disabled}
             />
             <button
             onClick={func}
@@ -31,8 +33,6 @@ const Input: FC<inputProps> = ({
             {btnText}
             </button>
         </div>
-        </div>
-
     )
 }
 
