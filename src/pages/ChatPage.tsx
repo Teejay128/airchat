@@ -1,14 +1,12 @@
 import { FC, useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useLocation, Navigate } from "react-router-dom";
 import { db } from "../../firebase-config";
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { collection, addDoc, onSnapshot } from "firebase/firestore";
 
 import { Message, messageProp } from "../components/Message";
-import Input from "../components/Input"
+import Input from "../components/Input";
+import Prompt from "../components/Prompt";
+
 // import { defaultMessages } from "../assets/messages";
 
 type chatProps = {
@@ -18,49 +16,47 @@ type chatProps = {
 
 const ChatPage: FC<chatProps> = ({ room, user }) => {
   const [messages, setMessages] = useState<messageProp[]>([]);
-  const { chatId } = useParams()
-  const navigate = useNavigate()
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const inputTextRef = useRef<HTMLInputElement>(null)
+  const { chatId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation()
+  const inputTextRef = useRef<HTMLInputElement>(null);
 
-  // CONSOLER RIGHT HERE
-  if(chatId) console.log(chatId)
-  if(!room) room = "Airchat"
+  if (!room || room != chatId) {
+    return <Navigate to={"/room?inv=" + chatId} state={{ from: location }} replace />
+  }
+
   const messagesRef = collection(db, room);
 
   useEffect(() => {
     // Make it so that this stuff is not called when the user is switching compState
-    const unsubscribe = onSnapshot(messagesRef, (doc) => {    
-      const newMessages: messageProp[] = doc.docChanges()
+    const unsubscribe = onSnapshot(messagesRef, (doc) => {
+      const newMessages: messageProp[] = doc
+        .docChanges()
         .filter((change) => change.type === "added")
         .map((change) => {
-          let message = change.doc.data()
-          return{
+          let message = change.doc.data();
+          return {
             id: change.doc.id,
             type: message.type,
             sender: message.sender,
             time: message.time,
-            text: message.text
-          }
+            text: message.text,
+          };
         })
-        .sort((a, b) => a.time - b.time)
+        .sort((a, b) => a.time - b.time);
 
-        if (newMessages.length > 0) {
-          setMessages((prevMessages) => [...prevMessages, ...newMessages])
-        }
-        
-        if(scrollRef.current) {
-          scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
+      if (newMessages.length > 0) {
+        setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+      }
     });
-  
+
     return () => unsubscribe();
   }, []);
 
   const sendMessage = async () => {
-    if(!inputTextRef.current) return
-    const currentInput = inputTextRef.current.value
-    
+    if (!inputTextRef.current) return;
+    const currentInput = inputTextRef.current.value;
+
     try {
       await addDoc(messagesRef, {
         type: "message",
@@ -69,39 +65,36 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
         text: currentInput,
       });
 
-      inputTextRef.current.value = ""
+      inputTextRef.current.value = "";
     } catch (error) {
       console.error(error);
     }
   };
 
-  const signInPage = () => {
-    navigate("/auth")
-  }
-
   return (
-    <div className="flex flex-col bg-gradient-to-b from-indigo-800 to-indigo-300">
-      <div className="flex-1 flex flex-col justify-end p-4 overflow-y-auto">
-        {messages.map((message) => (
-          <Message
-            key={message.id}
-            type={
-              message.type === "ai"
-                ? "ai"
-                : message.sender === user
-                ? "self"
-                : "other"
-            }
-            sender={message.sender}
-            time={message.time}
-            text={message.text}
-            id={message.id}
-          />
-        ))}
-        <div ref={scrollRef} />
-      </div>
+    <>
+      <main className="flex-1 container mx-auto mt-4 p-2 rounded-lg shadow-md backdrop-blur-sm">
+        <section className="flex flex-col justify-end space-y-2">
+          {messages.map((message) => (
+            <Message
+              key={message.id}
+              type={
+                message.type === "ai"
+                  ? "ai"
+                  : message.sender === user
+                  ? "self"
+                  : "other"
+              }
+              sender={message.sender}
+              time={message.time}
+              text={message.text}
+              id={message.id}
+            />
+          ))}
+        </section>
+      </main>
 
-      <div className="p-1 bg-indigo-300 sticky bottom-0 z-50">
+      <footer className="sticky bottom-0 z-50 bg-indigo-300 border-t border-gray-300 p-1 shadow-sm">
         {user ? (
           <Input
             placeholder="Type your message..."
@@ -111,16 +104,14 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
             disabled={false}
           />
         ) : (
-          <Input
-            placeholder="Sign in to send messages to this room"
-            ref={inputTextRef}
-            func={signInPage}
+          <Prompt
+            text="Sign in to send messages to this room"
+            func={() => navigate("/auth")}
             btnText="Go to SignIn"
-            disabled={true}
           />
         )}
-      </div>
-    </div>
+      </footer>
+    </>
   );
 };
 

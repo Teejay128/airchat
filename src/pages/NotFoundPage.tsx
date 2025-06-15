@@ -1,10 +1,9 @@
-import { FC, useRef } from "react";
-
-import Input from "../components/Input";
+import { FC } from "react";
 import { useNavigate } from "react-router-dom";
 
+import Prompt from "../components/Prompt";
+
 const NotFoundPage: FC = () => {
-  const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   return (
@@ -43,6 +42,7 @@ const NotFoundPage: FC = () => {
             </li>
           </ul>
         </section>
+        {/* Implement some no as a service something... */}
 
         {/* Developer Easter Egg (Optional) */}
         <section>
@@ -52,13 +52,11 @@ const NotFoundPage: FC = () => {
         </section>
       </main>
 
-      <footer className="p-1 bg-indigo-300 shadow-md sticky bottom-0 z-50">
-        <Input
-          placeholder="Click below to go back to safety"
-          ref={inputRef}
+      <footer className="sticky bottom-0 z-50 bg-indigo-300 border-t border-gray-300 p-1 shadow-sm">
+        <Prompt
+          text="Click here to go back to safety"
           func={() => navigate("/")}
           btnText="Take Me Home"
-          disabled={true}
         />
       </footer>
     </>

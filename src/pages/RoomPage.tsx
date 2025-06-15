@@ -1,8 +1,9 @@
 import { FC, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 import Input from "../components/Input";
+import Prompt from "../components/Prompt";
 
 const cookie = new Cookies();
 
@@ -12,38 +13,56 @@ type roomProps = {
 };
 
 const RoomPage: FC<roomProps> = ({ room, setRoom }) => {
-  const { roomId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation()
+  const [searchParams] = useSearchParams();
   const roomInputRef = useRef<HTMLInputElement>(null);
 
-  const acceptInvite = (id: string) => {
-    navigate("/chat/" + id);
-    cookie.set("room", id);
-    setRoom(id);
-  };
+
+  const acceptInvite = (invite: string) => {
+    console.log("accepting invite")
+    setRoom(invite);
+    cookie.set("room", invite);
+    navigate("/chat/" + invite, { replace: true });
+  }
 
   const joinRoom = () => {
     if (!roomInputRef.current || !roomInputRef.current.value) return;
-
     const roomInput = roomInputRef.current.value;
+    const redirect = location.state?.from || "/chat/" + roomInput
+    
 
-    navigate("/chat/" + roomInput);
-    cookie.set("room", roomInput);
     setRoom(roomInput);
+    cookie.set("room", roomInput);
+    navigate(redirect, { replace: true });
     roomInputRef.current.value = "";
   };
 
   const leaveRoom = () => {
-    console.log("does it reach here...");
     cookie.remove("room");
     setRoom("");
   };
+
+  if(searchParams.get("inv")) {
+    const inv = searchParams.get("inv")
+    if(inv) {
+      return (
+        <Input
+          placeholder={"You were invited to: " + inv}
+          ref={roomInputRef}
+          func={() => acceptInvite(inv)}
+          btnText="Accept"
+          disabled={false}
+        />
+      )
+    }
+  }
 
   return (
     <>
       <main className="flex-1 container mx-auto mt-4 p-6 bg-indigo-100/60 text-gray-800 rounded-lg shadow-md backdrop-blur-sm">
         <section className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-800">
+          <h1 className="text-3xl font-bold text-gray-800">
             Current room:{" "}
             <span className="font-semibold text-indigo-700">{room || "none"}</span>
           </h1>
@@ -72,29 +91,19 @@ const RoomPage: FC<roomProps> = ({ room, setRoom }) => {
         {/* Section for room management (admin) */}
       </main>
 
-      <footer className="p-1 bg-indigo-300 shadow-md sticky bottom-0 z-50">
-        {roomId ? (
-          <Input
-            placeholder={"You have been invited to join a room: " + roomId}
-            ref={roomInputRef}
-            func={() => acceptInvite(roomId)}
-            btnText="Accept Invite"
-            disabled={true}
-          />
-        ) : room ? (
-          <Input
-            placeholder={"Current room: " + room}
-            ref={roomInputRef}
+      <footer className="sticky bottom-0 z-50 bg-indigo-300 border-t border-gray-300 p-1 shadow-sm">
+        {room ? (
+          <Prompt
+            text={"Current room: " + room}
             func={leaveRoom}
             btnText="Leave Room"
-            disabled={true}
           />
         ) : (
           <Input
             placeholder="Enter Room Name"
             ref={roomInputRef}
             func={joinRoom}
-            btnText="Enter Room"
+            btnText="Join"
             disabled={false}
           />
         )}

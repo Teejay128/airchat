@@ -32,14 +32,14 @@ const Header: FC<headerProps> = ({
             <FaComment className="text-white" />
           </Link>
         ) : (
-          <div className="action-button" title="Sign in to Chat">
+          <div className="action-button" title="Requires Room and User">
             <FaComment className="text-white opacity-50" />
           </div>
         )}
         <Link to="/room/" title="Switch Room" className="action-button">
           <FaDoorOpen className="text-white" />
         </Link>
-        <Link to="/auth" className="action-button" type="button" title="User settings">
+        <Link to="/user" className="action-button" type="button" title="User settings">
           <FaUser className="text-white" />
         </Link>
       </div>
