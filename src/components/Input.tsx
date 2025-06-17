@@ -15,9 +15,13 @@ const Input: FC<inputProps> = ({
     btnText,
     disabled
 }) => {
+    const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        func();
+    }
 
     return (
-        <div className="py-1 bg-indigo-300 shadow-md sticky bottom-0 z-50 flex items-center">
+        <form onSubmit={submitHandler} className="py-1 bg-indigo-300 shadow-md sticky bottom-0 z-50 flex items-center">
             <input
             type="text"
             placeholder={placeholder}
@@ -27,12 +31,12 @@ const Input: FC<inputProps> = ({
             disabled={disabled}
             />
             <button
-            onClick={func}
+            type="submit"
             className={"bg-indigo-800 text-white px-2 py-2 text-sm font-bold rounded-r-md hover:bg-indigo-700 active:bg-indigo-900 transition-colors duration-200"}
             >
             {btnText}
             </button>
-        </div>
+        </form>
     )
 }
 
