@@ -20,6 +20,7 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
   const navigate = useNavigate();
   const location = useLocation()
   const inputTextRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   if (!room || room != chatId) {
     return <Navigate to={"/room?inv=" + chatId} state={{ from: location }} replace />
@@ -53,9 +54,14 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth'})
+  }, [messages])
+
   const sendMessage = async () => {
     if (!inputTextRef.current) return;
     const currentInput = inputTextRef.current.value;
+    inputTextRef.current.value = "";
 
     try {
       await addDoc(messagesRef, {
@@ -64,8 +70,6 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
         time: new Date(),
         text: currentInput,
       });
-
-      inputTextRef.current.value = "";
     } catch (error) {
       console.error(error);
     }
@@ -74,7 +78,7 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
   return (
     <>
       <main className="flex-1 container mx-auto mt-4 p-2 rounded-lg shadow-md backdrop-blur-sm">
-        <section className="flex flex-col justify-end space-y-2">
+        <section className="flex flex-col justify-end space-y-2 overflow-">
           {messages.map((message) => (
             <Message
               key={message.id}
@@ -91,6 +95,7 @@ const ChatPage: FC<chatProps> = ({ room, user }) => {
               id={message.id}
             />
           ))}
+          <div ref={bottomRef}></div>
         </section>
       </main>
 

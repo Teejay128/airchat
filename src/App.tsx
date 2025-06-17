@@ -28,7 +28,7 @@ const App: FC = () => {
         <Route path="/room" element={<RoomPage room={room} setRoom={setRoom} />} />
 
         {/* Protected Routes */}
-        <Route element={<PrivateRoute user={user} room={room} />} >
+        <Route element={<PrivateRoute user={user} />} >
           <Route path="/chat/" element={<ChatPage room={room} user={user} />} />
           <Route path="/chat/:chatId" element={<ChatPage room={room} user={user} />} />
         </Route>
